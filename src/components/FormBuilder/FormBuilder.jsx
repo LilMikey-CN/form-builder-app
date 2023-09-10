@@ -11,189 +11,222 @@ import { API_BASE_URL, FORMS_ENDPOINT } from '../../apiConfig';
 
 // Styled components to manage the layout and appearance of elements
 const QuestionContainer = styled(Box)(({ theme }) => ({
-  marginBottom: '16px',
-  padding: '16px',
-  borderRadius: '8px',
-  boxShadow: '0 0 10px rgba(0,0,0,0.1)',
+    marginBottom: '16px',
+    padding: '16px',
+    borderRadius: '8px',
+    boxShadow: '0 0 10px rgba(0,0,0,0.1)',
 }));
 
 const OptionContainer = styled(Box)(({ theme }) => ({
-  marginBottom: '8px',
-  marginLeft: '24px',
+    marginBottom: '8px',
+    marginLeft: '24px',
 }));
 
 const StyledFormControl = styled(FormControl)(({ theme }) => ({
-  flex: 1,
-  maxWidth: '200px',
-  marginRight: theme.spacing(2),
+    flex: 1,
+    maxWidth: '200px',
+    marginRight: theme.spacing(2),
 }));
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
-  flex: 3,
+    flex: 3,
 }));
 
 const FlexContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  marginBottom: theme.spacing(2),
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: theme.spacing(2),
 }));
 
 const FlexButtonContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing(2),
-  marginBottom: theme.spacing(2),
+    display: 'flex',
+    gap: theme.spacing(2),
+    marginBottom: theme.spacing(2),
 }));
 
 const ContainerWithPadding = styled(Container)(({ theme }) => ({
-  paddingBottom: '50px',
+    paddingBottom: '50px',
 }));
 
 const FormBuilder = () => {
-  const [form, setForm] = useState({ title: '', questions: [{ type: 'short_answer', text: '', options: [''], textAreaActive: false }] });
+    const [form, setForm] = useState(
+        { 
+            title: '', 
+            questions: 
+            [{ 
+                type: 'short_answer', 
+                text: '', 
+                options: [''], 
+                textAreaActive: false 
+            }] 
+        });
 
-  const handleAddQuestion = () => {
-    setForm({ ...form, questions: [...form.questions, { type: 'short_answer', text: '', options: [''], textAreaActive: false }] });
-  };
+    const handleAddQuestion = () => {
+        setForm(
+            { 
+                ...form, 
+                questions: 
+                [...form.questions, 
+                    { type: 'short_answer', text: '', options: [''], textAreaActive: false }
+                ] 
+            }
+        );
+    };
 
-  const handleQuestionChange = (questionIndex, value) => {
-    const newQuestions = [...form.questions];
-    newQuestions[questionIndex].text = value;
-    setForm({ ...form, questions: newQuestions });
-  };
+    const handleQuestionChange = (questionIndex, value) => {
+        const newQuestions = [...form.questions];
+        newQuestions[questionIndex].text = value;
+        setForm({ ...form, questions: newQuestions });
+    };
 
-  const handleTypeChange = (questionIndex, value) => {
-    const newQuestions = [...form.questions];
-    newQuestions[questionIndex].type = value;
-    setForm({ ...form, questions: newQuestions });
-  };
+    const handleTypeChange = (questionIndex, newType) => {
+        const newQuestions = [...form.questions];
+        newQuestions[questionIndex].type = newType;
 
-  const handleAddOption = (questionIndex) => {
-    const newQuestions = [...form.questions];
-    newQuestions[questionIndex].options.push('');
-    setForm({ ...form, questions: newQuestions });
-  };
+        // Reset options if the new type is paragraph or short answer
+        if (newType === 'paragraph' || newType === 'short_answer') {
+            newQuestions[questionIndex].options = null;
+        } else {
+            // If options do not exist, initialize them
+            if (!newQuestions[questionIndex].options) {
+                newQuestions[questionIndex].options = [''];
+            }
+        }
+        setForm({ ...form, questions: newQuestions });
+    };
 
-  const handleOptionChange = (questionIndex, optionIndex, value) => {
-    const newQuestions = [...form.questions];
-    newQuestions[questionIndex].options[optionIndex] = value;
-    setForm({ ...form, questions: newQuestions });
-  };
+    const handleAddOption = (questionIndex) => {
+        const newQuestions = [...form.questions];
+        newQuestions[questionIndex].options.push('');
+        setForm({ ...form, questions: newQuestions });
+    };
 
-  const handleDeleteQuestion = (questionIndex) => {
-    setForm({ ...form, questions: form.questions.filter((_, index) => index !== questionIndex) });
-  };
+    const handleOptionChange = (questionIndex, optionIndex, value) => {
+        const newQuestions = [...form.questions];
+        newQuestions[questionIndex].options[optionIndex] = value;
+        setForm({ ...form, questions: newQuestions });
+    };
 
-  const handleDeleteOption = (questionIndex, optionIndex) => {
-    const newQuestions = [...form.questions];
-    newQuestions[questionIndex].options = newQuestions[questionIndex].options.filter((_, index) => index !== optionIndex);
-    setForm({ ...form, questions: newQuestions });
-  };
+    const handleDeleteQuestion = (questionIndex) => {
+        setForm({ 
+            ...form, 
+            questions: form.questions.filter((_, index) => index !== questionIndex) 
+        });
+    };
 
-  const handleTextareaFocus = (questionIndex) => {
-    const newQuestions = [...form.questions];
-    newQuestions[questionIndex].textAreaActive = true;
-    setForm({ ...form, questions: newQuestions });
-  };
+    const handleDeleteOption = (questionIndex, optionIndex) => {
+        const newQuestions = [...form.questions];
+        newQuestions[questionIndex].options = 
+            newQuestions[questionIndex].options.filter((_, index) => index !== optionIndex);
+        setForm({ ...form, questions: newQuestions });
+    };
 
-  // the handleTextareaBlur function now sets the textAreaActive property 
+    const handleTextareaFocus = (questionIndex) => {
+        const newQuestions = [...form.questions];
+        newQuestions[questionIndex].textAreaActive = true;
+        setForm({ ...form, questions: newQuestions });
+    };
+
+    // the handleTextareaBlur function now sets the textAreaActive property 
     // back to false with a 30ms delay, allowing the text area to resize 
     // properly even when switching quickly between text fields.
-  const handleTextareaBlur = (questionIndex) => {
-    setTimeout(() => {
-      const newQuestions = [...form.questions];
-      newQuestions[questionIndex].textAreaActive = false;
-      setForm({ ...form, questions: newQuestions });
-    }, 30);
-  };
 
-  const handleSubmit = async () => {
-    try {
-      await axios.post(`${API_BASE_URL}${FORMS_ENDPOINT}`, form);
-      alert('Form submitted successfully');
-    } catch (error) {
-      alert('Error submitting form');
-    }
-  };
+        const handleTextareaBlur = (questionIndex) => {
+            setTimeout(() => {
+                const newQuestions = [...form.questions];
+                newQuestions[questionIndex].textAreaActive = false;
+                setForm({ ...form, questions: newQuestions });
+            }, 30);
+        };
 
-  return (
-    <ContainerWithPadding>
-      <Typography variant="h4" mb={2}>Form Builder</Typography>
-      <TextField
+    const handleSubmit = async () => {
+        try {
+            await axios.post(`${API_BASE_URL}${FORMS_ENDPOINT}`, form);
+            alert('Form submitted successfully');
+        } catch (error) {
+            alert('Error submitting form');
+        }
+    };
+
+    return (
+        <ContainerWithPadding>
+        <Typography variant="h4" mb={2}>Form Builder</Typography>
+        <TextField
         label="Form Title"
         fullWidth
         variant="outlined"
         mb={3}
         value={form.title}
         onChange={(e) => setForm({ ...form, title: e.target.value })}
-      />
-      {form.questions.map((question, questionIndex) => (
-        <QuestionContainer key={questionIndex}>
-          <FlexContainer>
+        />
+        {form.questions.map((question, questionIndex) => (
+            <QuestionContainer key={questionIndex}>
+            <FlexContainer>
             <StyledFormControl variant="outlined">
-              <InputLabel>Question Type</InputLabel>
-              <Select
-                value={question.type}
-                onChange={(e) => handleTypeChange(questionIndex, e.target.value)}
-                label="Question Type"
-              >
-                <MenuItem value="short_answer">
-                  <ShortTextIcon /> Short Answer
-                </MenuItem>
-                <MenuItem value="paragraph">
-                  <SubjectIcon /> Paragraph
-                </MenuItem>
-                <MenuItem value="multiple_choice">
-                  <RadioButtonCheckedIcon /> Multiple Choice
-                </MenuItem>
-                <MenuItem value="checkbox">
-                  <CheckBoxIcon /> Checkbox
-                </MenuItem>
-              </Select>
+            <InputLabel>Question Type</InputLabel>
+            <Select
+            value={question.type}
+            onChange={(e) => handleTypeChange(questionIndex, e.target.value)}
+            label="Question Type"
+            >
+            <MenuItem value="short_answer">
+            <ShortTextIcon /> Short Answer
+            </MenuItem>
+            <MenuItem value="paragraph">
+            <SubjectIcon /> Paragraph
+            </MenuItem>
+            <MenuItem value="multiple_choice">
+            <RadioButtonCheckedIcon /> Multiple Choice
+            </MenuItem>
+            <MenuItem value="checkbox">
+            <CheckBoxIcon /> Checkbox
+            </MenuItem>
+            </Select>
             </StyledFormControl>
             <StyledTextField
-              variant="outlined"
-              placeholder="Question Text"
-              fullWidth
-              multiline={question.textAreaActive}
-              rows={question.textAreaActive ? 4 : 1}
-              value={question.text}
-              onFocus={() => handleTextareaFocus(questionIndex)}
-              onBlur={() => handleTextareaBlur(questionIndex)}
-              onChange={(e) => handleQuestionChange(questionIndex, e.target.value)}
+            variant="outlined"
+            placeholder="Question Text"
+            fullWidth
+            multiline={question.textAreaActive}
+            rows={question.textAreaActive ? 4 : 1}
+            value={question.text}
+            onFocus={() => handleTextareaFocus(questionIndex)}
+            onBlur={() => handleTextareaBlur(questionIndex)}
+            onChange={(e) => handleQuestionChange(questionIndex, e.target.value)}
             />
             <IconButton onClick={() => handleDeleteQuestion(questionIndex)}>
-              <DeleteIcon />
+            <DeleteIcon />
             </IconButton>
-          </FlexContainer>
-          {question.options ? (
-            question.options.map((option, optionIndex) => (
-              <OptionContainer key={optionIndex}>
-                <TextField
-                  variant="outlined"
-                  placeholder="Option"
-                  fullWidth
-                  value={option}
-                  onChange={(e) => handleOptionChange(questionIndex, optionIndex, e.target.value)}
-                />
-                <IconButton onClick={() => handleDeleteOption(questionIndex, optionIndex)}>
-                  <DeleteIcon />
-                </IconButton>
-              </OptionContainer>
-            ))
-          ) : null}
-          {(question.type === 'multiple_choice' || question.type === 'checkbox') && (
-            <Button variant="outlined" onClick={() => handleAddOption(questionIndex)}>
-              Add Option
-            </Button>
-          )}
-        </QuestionContainer>
-      ))}
-      <FlexButtonContainer>
+            </FlexContainer>
+            {question.options ? (
+                question.options.map((option, optionIndex) => (
+                    <OptionContainer key={optionIndex}>
+                    <TextField
+                    variant="outlined"
+                    placeholder="Option"
+                    fullWidth
+                    value={option}
+                    onChange={(e) => handleOptionChange(questionIndex, optionIndex, e.target.value)}
+                    />
+                    <IconButton onClick={() => handleDeleteOption(questionIndex, optionIndex)}>
+                    <DeleteIcon />
+                    </IconButton>
+                    </OptionContainer>
+                ))
+            ) : null}
+            {(question.type === 'multiple_choice' || question.type === 'checkbox') && (
+                <Button variant="outlined" onClick={() => handleAddOption(questionIndex)}>
+                Add Option
+                </Button>
+            )}
+            </QuestionContainer>
+        ))}
+        <FlexButtonContainer>
         <Button variant="contained" onClick={handleAddQuestion}>Add New Question</Button>
         <Button variant="contained" color="primary" onClick={handleSubmit}>Submit</Button>
-      </FlexButtonContainer>
-    </ContainerWithPadding>
-  );
+        </FlexButtonContainer>
+        </ContainerWithPadding>
+    );
 };
 
 export default FormBuilder;
