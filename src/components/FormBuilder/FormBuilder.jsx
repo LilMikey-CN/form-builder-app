@@ -1,57 +1,67 @@
-import React from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import { Button, TextField, Typography, Container, Select, MenuItem, FormControl, InputLabel, IconButton } from '@mui/material';
+import { Button, TextField, Typography, Container, Select, MenuItem, FormControl, InputLabel, IconButton, Box } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import ListAltIcon from '@mui/icons-material/ListAlt';
+import ShortTextIcon from '@mui/icons-material/ShortText';
+import SubjectIcon from '@mui/icons-material/Subject';
+import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import { styled } from '@mui/system';
 import { API_BASE_URL, FORMS_ENDPOINT } from '../../apiConfig';
 
-const QuestionContainer = styled('div')(({ theme }) => ({
+const QuestionContainer = styled(Box)(({ theme }) => ({
   marginBottom: '16px',
   padding: '16px',
   borderRadius: '8px',
   boxShadow: '0 0 10px rgba(0,0,0,0.1)',
 }));
 
-const OptionContainer = styled('div')(({ theme }) => ({
+const OptionContainer = styled(Box)(({ theme }) => ({
   marginBottom: '8px',
   marginLeft: '24px',
 }));
 
 const StyledFormControl = styled(FormControl)(({ theme }) => ({
-  marginBottom: theme.spacing(2),
+  flex: 1,
   marginRight: theme.spacing(2),
-  width: '45%',
 }));
 
-const FlexContainer = styled('div')(({ theme }) => ({
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  flex: 1,
+}));
+
+const FlexContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   marginBottom: theme.spacing(2),
 }));
 
-const IconContainer = styled('div')(({ theme }) => ({
+const FlexButtonContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
-  alignItems: 'center',
-  marginRight: theme.spacing(2),
+  gap: theme.spacing(2),
+  marginBottom: theme.spacing(2),
+}));
+
+const ContainerWithPadding = styled(Container)(({ theme }) => ({
+  paddingBottom: '50px',
 }));
 
 const FormBuilder = () => {
-  const [form, setForm] = React.useState({ title: '', questions: [] });
+  const [form, setForm] = useState({ title: '', questions: [{ type: 'short_answer', text: '', options: [''] }] });
 
   const handleAddQuestion = () => {
-    setForm({
-      ...form,
-      questions: [
-        ...form.questions,
-        { type: 'short_answer', text: '', options: [] },
-      ],
-    });
+    setForm({ ...form, questions: [...form.questions, { type: 'short_answer', text: '', options: [''] }] });
   };
 
-  const handleQuestionChange = (index, value) => {
+  const handleQuestionChange = (questionIndex, value) => {
     const newQuestions = [...form.questions];
-    newQuestions[index].text = value;
+    newQuestions[questionIndex].text = value;
+    setForm({ ...form, questions: newQuestions });
+  };
+
+  const handleTypeChange = (questionIndex, value) => {
+    const newQuestions = [...form.questions];
+    newQuestions[questionIndex].type = value;
     setForm({ ...form, questions: newQuestions });
   };
 
@@ -67,15 +77,8 @@ const FormBuilder = () => {
     setForm({ ...form, questions: newQuestions });
   };
 
-  const handleQuestionTypeChange = (questionIndex, value) => {
-    const newQuestions = [...form.questions];
-    newQuestions[questionIndex].type = value;
-    setForm({ ...form, questions: newQuestions });
-  };
-
   const handleDeleteQuestion = (questionIndex) => {
-    const newQuestions = form.questions.filter((_, index) => index !== questionIndex);
-    setForm({ ...form, questions: newQuestions });
+    setForm({ ...form, questions: form.questions.filter((_, index) => index !== questionIndex) });
   };
 
   const handleDeleteOption = (questionIndex, optionIndex) => {
@@ -89,12 +92,12 @@ const FormBuilder = () => {
       await axios.post(`${API_BASE_URL}${FORMS_ENDPOINT}`, form);
       alert('Form submitted successfully');
     } catch (error) {
-      console.error('Error submitting form:', error);
+      alert('Error submitting form');
     }
   };
 
   return (
-    <Container>
+    <ContainerWithPadding>
       <Typography variant="h4" mb={2}>Form Builder</Typography>
       <TextField
         label="Form Title"
@@ -107,56 +110,65 @@ const FormBuilder = () => {
       {form.questions.map((question, questionIndex) => (
         <QuestionContainer key={questionIndex}>
           <FlexContainer>
-            <IconContainer>
-              <ListAltIcon />
-            </IconContainer>
             <StyledFormControl variant="outlined">
               <InputLabel>Question Type</InputLabel>
               <Select
                 value={question.type}
-                onChange={(e) => handleQuestionTypeChange(questionIndex, e.target.value)}
+                onChange={(e) => handleTypeChange(questionIndex, e.target.value)}
                 label="Question Type"
               >
-                <MenuItem value="short_answer">Short Answer</MenuItem>
-                <MenuItem value="paragraph">Paragraph</MenuItem>
-                <MenuItem value="multiple_choice">Multiple Choice</MenuItem>
-                <MenuItem value="checkbox">Checkbox</MenuItem>
+                <MenuItem value="short_answer">
+                  <ShortTextIcon /> Short Answer
+                </MenuItem>
+                <MenuItem value="paragraph">
+                  <SubjectIcon /> Paragraph
+                </MenuItem>
+                <MenuItem value="multiple_choice">
+                  <RadioButtonCheckedIcon /> Multiple Choice
+                </MenuItem>
+                <MenuItem value="checkbox">
+                  <CheckBoxIcon /> Checkbox
+                </MenuItem>
               </Select>
             </StyledFormControl>
-            <TextField
-              label="Question Text"
-              fullWidth
+            <StyledTextField
               variant="outlined"
+              label="Question Text"
               value={question.text}
               onChange={(e) => handleQuestionChange(questionIndex, e.target.value)}
-              style={{ flex: 1 }}
             />
+            <IconButton onClick={() => handleDeleteQuestion(questionIndex)}>
+              <DeleteIcon />
+            </IconButton>
           </FlexContainer>
+          {question.type === 'multiple_choice' || question.type === 'checkbox' ? (
+            question.options.map((option, optionIndex) => (
+              <OptionContainer key={optionIndex}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  label="Option"
+                  value={option}
+                  onChange={(e) => handleOptionChange(questionIndex, optionIndex, e.target.value)}
+                />
+                <IconButton onClick={() => handleDeleteOption(questionIndex, optionIndex)}>
+                  <DeleteIcon />
+                </IconButton>
+              </OptionContainer>
+            ))
+          ) : null}
           {(question.type === 'multiple_choice' || question.type === 'checkbox') && (
-            <>
-              {question.options.map((option, optionIndex) => (
-                <OptionContainer key={optionIndex}>
-                  <TextField
-                    label="Option"
-                    fullWidth
-                    variant="outlined"
-                    value={option}
-                    onChange={(e) => handleOptionChange(questionIndex, optionIndex, e.target.value)}
-                  />
-                  <IconButton onClick={() => handleDeleteOption(questionIndex, optionIndex)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </OptionContainer>
-              ))}
-              <Button variant="contained" onClick={() => handleAddOption(questionIndex)}>Add Option</Button>
-            </>
+            <Button variant="outlined" onClick={() => handleAddOption(questionIndex)}>
+              Add Option
+            </Button>
           )}
-          <Button variant="contained" color="error" onClick={() => handleDeleteQuestion(questionIndex)}>Delete Question</Button>
         </QuestionContainer>
       ))}
-      <Button variant="contained" onClick={handleAddQuestion}>Add Question</Button>
-      <Button variant="contained" color="primary" onClick={handleSubmit}>Submit Form</Button>
-    </Container>
+      <FlexButtonContainer>
+        <Button variant="contained" onClick={handleAddQuestion}>Add New Question</Button>
+        <Button variant="contained" color="primary" onClick={handleSubmit}>Submit</Button>
+      </FlexButtonContainer>
+    </ContainerWithPadding>
   );
 };
 
