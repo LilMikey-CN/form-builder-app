@@ -95,10 +95,15 @@ const FormBuilder = () => {
     setForm({ ...form, questions: newQuestions });
   };
 
+  // the handleTextareaBlur function now sets the textAreaActive property 
+    // back to false with a 30ms delay, allowing the text area to resize 
+    // properly even when switching quickly between text fields.
   const handleTextareaBlur = (questionIndex) => {
-    const newQuestions = [...form.questions];
-    newQuestions[questionIndex].textAreaActive = false;
-    setForm({ ...form, questions: newQuestions });
+    setTimeout(() => {
+      const newQuestions = [...form.questions];
+      newQuestions[questionIndex].textAreaActive = false;
+      setForm({ ...form, questions: newQuestions });
+    }, 30);
   };
 
   const handleSubmit = async () => {
