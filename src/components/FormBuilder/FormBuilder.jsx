@@ -1,20 +1,25 @@
-import * as React from 'react';
+import React from 'react';
 import axios from 'axios';
-import { Button, TextField, Typography, Container, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { Button, TextField, Typography, Container, Select, MenuItem, FormControl, InputLabel, IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { styled } from '@mui/system';
 import { API_BASE_URL, FORMS_ENDPOINT } from '../../apiConfig';
 
-const QuestionContainer = styled('div')({
+const QuestionContainer = styled('div')(({ theme }) => ({
   marginBottom: '16px',
-  paddingLeft: '8px',
-  borderLeft: '4px solid #3f51b5',
-});
+  padding: '16px',
+  borderRadius: '8px',
+  boxShadow: '0 0 10px rgba(0,0,0,0.1)',
+}));
 
-const OptionContainer = styled('div')({
+const OptionContainer = styled('div')(({ theme }) => ({
   marginBottom: '8px',
-  paddingLeft: '24px',
-  borderLeft: '4px solid #f50057',
-});
+  marginLeft: '24px',
+}));
+
+const StyledFormControl = styled(FormControl)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+}));
 
 const FormBuilder = () => {
   const [form, setForm] = React.useState({ title: '', questions: [] });
@@ -66,7 +71,6 @@ const FormBuilder = () => {
 
   const handleSubmit = async () => {
     try {
-      console.log('Submitting form:', form);
       await axios.post(`${API_BASE_URL}${FORMS_ENDPOINT}`, form);
       alert('Form submitted successfully');
     } catch (error) {
@@ -87,7 +91,7 @@ const FormBuilder = () => {
       />
       {form.questions.map((question, questionIndex) => (
         <QuestionContainer key={questionIndex}>
-          <FormControl variant="outlined" fullWidth mb={2}>
+          <StyledFormControl variant="outlined" fullWidth>
             <InputLabel>Question Type</InputLabel>
             <Select
               value={question.type}
@@ -99,7 +103,7 @@ const FormBuilder = () => {
               <MenuItem value="multiple_choice">Multiple Choice</MenuItem>
               <MenuItem value="checkbox">Checkbox</MenuItem>
             </Select>
-          </FormControl>
+          </StyledFormControl>
           <TextField
             label="Question Text"
             fullWidth
@@ -120,7 +124,9 @@ const FormBuilder = () => {
                     value={option}
                     onChange={(e) => handleOptionChange(questionIndex, optionIndex, e.target.value)}
                   />
-                  <Button variant="contained" color="error" onClick={() => handleDeleteOption(questionIndex, optionIndex)}>Delete Option</Button>
+                  <IconButton onClick={() => handleDeleteOption(questionIndex, optionIndex)}>
+                    <DeleteIcon />
+                  </IconButton>
                 </OptionContainer>
               ))}
               <Button variant="contained" onClick={() => handleAddOption(questionIndex)}>Add Option</Button>
