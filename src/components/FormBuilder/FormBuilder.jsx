@@ -9,6 +9,7 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import { styled } from '@mui/system';
 import { API_BASE_URL, FORMS_ENDPOINT } from '../../apiConfig';
 
+// Styled components to manage the layout and appearance of elements
 const QuestionContainer = styled(Box)(({ theme }) => ({
   marginBottom: '16px',
   padding: '16px',
@@ -23,11 +24,12 @@ const OptionContainer = styled(Box)(({ theme }) => ({
 
 const StyledFormControl = styled(FormControl)(({ theme }) => ({
   flex: 1,
+  maxWidth: '200px',
   marginRight: theme.spacing(2),
 }));
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
-  flex: 1,
+  flex: 3,
 }));
 
 const FlexContainer = styled(Box)(({ theme }) => ({
@@ -47,10 +49,10 @@ const ContainerWithPadding = styled(Container)(({ theme }) => ({
 }));
 
 const FormBuilder = () => {
-  const [form, setForm] = useState({ title: '', questions: [{ type: 'short_answer', text: '', options: [''] }] });
+  const [form, setForm] = useState({ title: '', questions: [{ type: 'short_answer', text: '', options: [''], textAreaActive: false }] });
 
   const handleAddQuestion = () => {
-    setForm({ ...form, questions: [...form.questions, { type: 'short_answer', text: '', options: [''] }] });
+    setForm({ ...form, questions: [...form.questions, { type: 'short_answer', text: '', options: [''], textAreaActive: false }] });
   };
 
   const handleQuestionChange = (questionIndex, value) => {
@@ -84,6 +86,18 @@ const FormBuilder = () => {
   const handleDeleteOption = (questionIndex, optionIndex) => {
     const newQuestions = [...form.questions];
     newQuestions[questionIndex].options = newQuestions[questionIndex].options.filter((_, index) => index !== optionIndex);
+    setForm({ ...form, questions: newQuestions });
+  };
+
+  const handleTextareaFocus = (questionIndex) => {
+    const newQuestions = [...form.questions];
+    newQuestions[questionIndex].textAreaActive = true;
+    setForm({ ...form, questions: newQuestions });
+  };
+
+  const handleTextareaBlur = (questionIndex) => {
+    const newQuestions = [...form.questions];
+    newQuestions[questionIndex].textAreaActive = false;
     setForm({ ...form, questions: newQuestions });
   };
 
@@ -133,21 +147,26 @@ const FormBuilder = () => {
             </StyledFormControl>
             <StyledTextField
               variant="outlined"
-              label="Question Text"
+              placeholder="Question Text"
+              fullWidth
+              multiline={question.textAreaActive}
+              rows={question.textAreaActive ? 4 : 1}
               value={question.text}
+              onFocus={() => handleTextareaFocus(questionIndex)}
+              onBlur={() => handleTextareaBlur(questionIndex)}
               onChange={(e) => handleQuestionChange(questionIndex, e.target.value)}
             />
             <IconButton onClick={() => handleDeleteQuestion(questionIndex)}>
               <DeleteIcon />
             </IconButton>
           </FlexContainer>
-          {question.type === 'multiple_choice' || question.type === 'checkbox' ? (
+          {question.options ? (
             question.options.map((option, optionIndex) => (
               <OptionContainer key={optionIndex}>
                 <TextField
-                  fullWidth
                   variant="outlined"
-                  label="Option"
+                  placeholder="Option"
+                  fullWidth
                   value={option}
                   onChange={(e) => handleOptionChange(questionIndex, optionIndex, e.target.value)}
                 />
