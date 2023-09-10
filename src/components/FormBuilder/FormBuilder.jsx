@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import { Button, TextField, Typography, Container, Select, MenuItem, FormControl, InputLabel, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ListAltIcon from '@mui/icons-material/ListAlt';
 import { styled } from '@mui/system';
 import { API_BASE_URL, FORMS_ENDPOINT } from '../../apiConfig';
 
@@ -19,6 +20,20 @@ const OptionContainer = styled('div')(({ theme }) => ({
 
 const StyledFormControl = styled(FormControl)(({ theme }) => ({
   marginBottom: theme.spacing(2),
+  marginRight: theme.spacing(2),
+  width: '45%',
+}));
+
+const FlexContainer = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  marginBottom: theme.spacing(2),
+}));
+
+const IconContainer = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  marginRight: theme.spacing(2),
 }));
 
 const FormBuilder = () => {
@@ -91,27 +106,32 @@ const FormBuilder = () => {
       />
       {form.questions.map((question, questionIndex) => (
         <QuestionContainer key={questionIndex}>
-          <StyledFormControl variant="outlined" fullWidth>
-            <InputLabel>Question Type</InputLabel>
-            <Select
-              value={question.type}
-              onChange={(e) => handleQuestionTypeChange(questionIndex, e.target.value)}
-              label="Question Type"
-            >
-              <MenuItem value="short_answer">Short Answer</MenuItem>
-              <MenuItem value="paragraph">Paragraph</MenuItem>
-              <MenuItem value="multiple_choice">Multiple Choice</MenuItem>
-              <MenuItem value="checkbox">Checkbox</MenuItem>
-            </Select>
-          </StyledFormControl>
-          <TextField
-            label="Question Text"
-            fullWidth
-            variant="outlined"
-            mb={2}
-            value={question.text}
-            onChange={(e) => handleQuestionChange(questionIndex, e.target.value)}
-          />
+          <FlexContainer>
+            <IconContainer>
+              <ListAltIcon />
+            </IconContainer>
+            <StyledFormControl variant="outlined">
+              <InputLabel>Question Type</InputLabel>
+              <Select
+                value={question.type}
+                onChange={(e) => handleQuestionTypeChange(questionIndex, e.target.value)}
+                label="Question Type"
+              >
+                <MenuItem value="short_answer">Short Answer</MenuItem>
+                <MenuItem value="paragraph">Paragraph</MenuItem>
+                <MenuItem value="multiple_choice">Multiple Choice</MenuItem>
+                <MenuItem value="checkbox">Checkbox</MenuItem>
+              </Select>
+            </StyledFormControl>
+            <TextField
+              label="Question Text"
+              fullWidth
+              variant="outlined"
+              value={question.text}
+              onChange={(e) => handleQuestionChange(questionIndex, e.target.value)}
+              style={{ flex: 1 }}
+            />
+          </FlexContainer>
           {(question.type === 'multiple_choice' || question.type === 'checkbox') && (
             <>
               {question.options.map((option, optionIndex) => (
@@ -120,7 +140,6 @@ const FormBuilder = () => {
                     label="Option"
                     fullWidth
                     variant="outlined"
-                    mb={2}
                     value={option}
                     onChange={(e) => handleOptionChange(questionIndex, optionIndex, e.target.value)}
                   />
